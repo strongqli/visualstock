@@ -13,8 +13,13 @@ sys.setdefaultencoding('utf8')
 def processPage(curQuar, pageUrl):
     html=urllib2.urlopen(pageUrl)
     soup=BeautifulSoup(html)
+    columnLen=soup.find_all('table')[0].thead.find_all('tr')[0].length
     for tag in soup.find_all('table')[0].tbody.find_all('tr'):
         tdlist = tag.find_all('td')
+        if(columnLen==13):
+            issuedatestr=tdlist[16].string
+        else:
+            issuedatestr=tdlist[15].string
         fRecord = FinanceRecord(stock_no=tdlist[1].string,
                                   quarter=curQuar,
                                   stock_name=tdlist[2].string,
@@ -30,7 +35,7 @@ def processPage(curQuar, pageUrl):
                                   roe=strToDecimal(tdlist[12].string),
                                   cash_flow_pershare=strToDecimal(tdlist[13].string),
                                   margin=strToDecimal(tdlist[14].string),
-                                  issuedate='-'.join(["2013", tdlist[16].string]))
+                                  issuedate='-'.join([curQuar[0:4], issuedatestr]))
         try:
             fRecord.save()
         except Exception, e:
